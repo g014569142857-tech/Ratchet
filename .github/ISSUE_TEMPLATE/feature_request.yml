@@ -1,0 +1,57 @@
+name: Feature request
+description: Suggest a capability or an improvement
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve
+      description: Describe the situation you are in, not just the thing you want built.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like
+      description: Roughly how it would work, and where you imagine it living.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part
+      options:
+        - New objective verifier
+        - New provider
+        - New embedder
+        - Retrieval / memory
+        - Reward / verifier
+        - Policy / bandit
+        - Evolution / distillation
+        - Profile
+        - Governance / permissions
+        - CLI
+        - Web console
+        - Training (Route A)
+        - Docs
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Including "I could do this outside Ratchet with a custom verifier/provider".
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Constraints
+      options:
+        - label: This can be done without adding a dependency to the core package
+        - label: This does not let arbitrary new text reach the experience store
+        - label: I am willing to work on this

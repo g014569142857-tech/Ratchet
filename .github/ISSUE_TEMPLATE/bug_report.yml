@@ -1,0 +1,86 @@
+name: Bug report
+description: Something does not work the way it should
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. Please do **not** paste the contents of your
+        `ratchet.db` — it contains your real work. A redacted description is fine.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The smallest sequence of commands or code that shows the problem.
+      placeholder: |
+        ratchet init
+        ratchet add "..."
+        ratchet chat "..." --provider echo
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part
+      options:
+        - CLI
+        - Python SDK / Engine
+        - Web console (ratchet panel)
+        - MCP server
+        - Retrieval / memory
+        - Reward / verifier
+        - Policy / bandit
+        - Reflection / evolution / distillation
+        - Profile
+        - Training export (Route A)
+        - Docs
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Ratchet version
+      description: Output of `ratchet --version`
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version and OS
+      placeholder: "3.13 on Windows 11"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Model provider
+      options:
+        - echo (offline)
+        - OpenAI
+        - Ollama / local
+        - Other OpenAI-compatible
+        - Not applicable
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output or traceback
+      description: Redact anything private first.
+      render: shell
