@@ -29,13 +29,18 @@ ratchet panel     # 或者在浏览器里做这两件事
 ## 快速上手
 
 ```bash
-pip install ratchet-ai
+git clone https://github.com/g014569142857-tech/Ratchet.git
+cd ratchet
+pip install -e .
 
 ratchet init
 ratchet add "回答用中文，三句话以内。"
 ratchet chat "解释一下 LoRA" --task "解释概念"
+ratchet rate up      # 看完回答后打分：没有奖励信号，就什么都学不到
 ratchet audit
 ```
+
+> 目前还没发布到 PyPI，请先从克隆下来的仓库安装。发布之后才能直接 `pip install ratchet-ai`。
 
 不需要 API key：默认后端是离线 echo，整个闭环照样跑得通，你可以先看清它到底在做什么，再决定花不花钱。要用真模型：
 
@@ -160,6 +165,11 @@ Ratchet 会自己琢磨你喜欢被怎么回答，不需要你手写设定。它
 - **底座越弱，收益越小。** 反思本身需要模型有能力对自己的失败做推理。
 - **收益会边际递减。** 库越大，检索精度越差。蒸馏和低分自动下架能延缓，但消不掉。
 - **路线 A 不保证有提升。** 微调可能无效甚至有害，还可能让你丢掉从没打算舍弃的能力。训到独立的 adapter 目录，别动底座，上之前用 `ratchet eval` 量一下。
+- **没有奖励信号就学不到东西。** 没配验证器时，没打分的回答只会被记成「未测量」：策略后验不动，反思也不触发。读完回答后用 `ratchet rate up|down` 打分，或者在库 API 里配一个客观验证器（跑测试、校验格式、对答案）。
+- **老虎机策略不分任务类型。** 全局只有一份后验，对总结最好、对代码最差的策略会被平均成一个数。按任务类型分开维护臂，是最直接的下一步。
+- **后验不会遗忘。** `alpha` 和 `beta` 只增不减，几百次交互之后，哪怕模型或你的口味变了，新的一次评分也很难撼动策略。加一个折扣因子就能解决。
+- **功劳分配比较粗。** 奖励同时算给被选中的策略和所有被召回的经验，没有对照组，所以「这条经验有用」只是相关性，不是测出来的结论。
+- **「强化学习」是简称，准确说是多臂老虎机加上下文记忆。** 没有状态转移，也不更新权重，更接近上下文学习，不算完整意义上的强化学习。
 - **「任何大模型」指的是任何有文本接口的模型**，不包括无法编程调用的封闭产品。
 
 ---
@@ -174,8 +184,8 @@ pytest
 核心包**零第三方运行时依赖**，整个测试套件离线可跑、不需要 API key，所以 CI 又快又免费。
 
 ```bash
-pip install 'ratchet-ai[train]'   # 路线 A：trl / peft / datasets
-pip install 'ratchet-ai[mcp]'     # MCP 服务，接 Cursor、Claude Desktop 等
+pip install -e '.[train]'   # 路线 A：trl / peft / datasets
+pip install -e '.[mcp]'     # MCP 服务，接 Cursor、Claude Desktop 等
 ```
 
 ---

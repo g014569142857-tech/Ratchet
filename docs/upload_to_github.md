@@ -221,7 +221,7 @@ pip install git+https://github.com/你的用户名/ratchet.git
 装得上就说明完美。
 
 **README 里的链接要不要改？**
-`pyproject.toml` 里写的项目地址是占位的 `github.com/ratchet-ai/ratchet`。想改成你自己的话，搜这个文件里的 `ratchet-ai` 换成你的用户名就行（不影响能不能用）。
+`pyproject.toml` 里写的项目地址是占位的 `github.com/g014569142857-tech/Ratchet`。想改成你自己的话，搜这个文件里的 `ratchet-ai` 换成你的用户名就行（不影响能不能用）。
 
 ---
 

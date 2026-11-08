@@ -212,6 +212,43 @@ class TestChat:
         assert "api key" in capsys.readouterr().err.lower()
 
 
+class TestRate:
+    """`ratchet rate` is the only way to judge an answer you have already read."""
+
+    def test_rate_up_rewards_the_last_answer_and_moves_the_policy(self, db):
+        run("init", "--db", db)
+        run("chat", "--db", db, "--provider", "echo", "--task", "t", "hello")
+        assert run("rate", "up", "--db", db) == 0
+        with ExperienceStore(db) as store:
+            event = store.list_events()[0]
+            assert event.reward == pytest.approx(1.0)
+            assert event.reward_source == "user"
+
+    def test_rate_down_records_zero(self, db):
+        run("init", "--db", db)
+        run("chat", "--db", db, "--provider", "echo", "--task", "t", "hello")
+        assert run("rate", "down", "--db", db) == 0
+        with ExperienceStore(db) as store:
+            assert store.list_events()[0].reward == pytest.approx(0.0)
+
+    def test_rate_without_any_interaction_fails(self, db, capsys):
+        run("init", "--db", db)
+        assert run("rate", "up", "--db", db) == 1
+        assert "no interaction" in capsys.readouterr().err
+
+    def test_rating_twice_is_refused_to_avoid_double_counting(self, db, capsys):
+        run("init", "--db", db)
+        run("chat", "--db", db, "--provider", "echo", "--task", "t", "hello")
+        assert run("rate", "up", "--db", db) == 0
+        assert run("rate", "down", "--db", db) == 1
+        assert "double-count" in capsys.readouterr().err
+
+    def test_chat_without_reward_says_nothing_was_learned(self, db, capsys):
+        run("init", "--db", db)
+        run("chat", "--db", db, "--provider", "echo", "--task", "t", "hello")
+        assert "nothing was learned" in capsys.readouterr().err
+
+
 class TestPublicApi:
     def test_top_level_exports_are_importable(self):
         import ratchet

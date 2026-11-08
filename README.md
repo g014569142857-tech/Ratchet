@@ -29,13 +29,18 @@ The only way a human writes into the store is a **bounded, structured correction
 ## Quickstart
 
 ```bash
-pip install ratchet-ai
+git clone https://github.com/g014569142857-tech/Ratchet.git
+cd ratchet
+pip install -e .
 
 ratchet init
 ratchet add "Answer in Chinese, three sentences at most."
 ratchet chat "explain LoRA" --task "explain a concept"
+ratchet rate up      # judge the answer you just read: no reward signal, nothing is learned
 ratchet audit
 ```
+
+> Not on PyPI yet, so install from a clone. Once it is published, `pip install ratchet-ai` will work.
 
 No API key needed — the default provider is an offline echo, so the whole loop runs and you can inspect it before spending anything. To use a real model:
 
@@ -160,6 +165,11 @@ Stated plainly, because overclaiming is how a project like this loses trust.
 - **Weak models benefit less.** Reflection requires the model to be able to reason about its own failures.
 - **Returns diminish.** As the library grows, retrieval precision drops. Distillation and automatic deactivation of low-scoring entries slow this, they do not eliminate it.
 - **Route A is not guaranteed to help.** Fine-tuning can be neutral or harmful, and can cost you capabilities you never meant to trade away. Train into a separate adapter, keep the base model, and measure with `ratchet eval` before adopting anything.
+- **Nothing is learned without a reward signal.** With no verifier configured, an unjudged answer is recorded as *unmeasured*, the bandit posterior does not move and no reflection fires. Use `ratchet rate up|down` after reading an answer, or configure an objective verifier (tests, schema, answer key) in the library API.
+- **The bandit is context-free.** One global posterior covers every kind of task, so a strategy that is best for summaries and worst for code is averaged into a single number. Keying arms by task type is the obvious next step.
+- **The posterior never forgets.** `alpha` and `beta` only grow, so after a few hundred interactions a single new rating barely moves the policy even if the model or your taste has changed. A discount factor would fix this.
+- **Credit assignment is coarse.** The reward is attributed to the chosen strategy *and* to every recalled experience at once, with no control group, so "this experience helped" is a correlation, not a measurement.
+- **"Reinforcement learning" is shorthand for a multi-armed bandit plus in-context memory.** There are no state transitions and no weight updates, so it belongs with in-context learning, not with RL in the full sense.
 - **"Any LLM" means any model with a text API.** It does not mean closed products you cannot call programmatically.
 
 ---
@@ -174,8 +184,8 @@ pytest
 Core has **zero third-party runtime dependencies** and the entire test suite runs offline with no API key, so CI is fast and free.
 
 ```bash
-pip install 'ratchet-ai[train]'   # Route A: trl / peft / datasets
-pip install 'ratchet-ai[mcp]'     # MCP server for Cursor, Claude Desktop, etc.
+pip install -e '.[train]'   # Route A: trl / peft / datasets
+pip install -e '.[mcp]'     # MCP server for Cursor, Claude Desktop, etc.
 ```
 
 ---

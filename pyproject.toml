@@ -46,9 +46,9 @@ mcp = ["mcp>=1.0,<3"]
 dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.5", "mypy>=1.8"]
 
 [project.urls]
-Homepage = "https://github.com/ratchet-ai/ratchet"
-Documentation = "https://github.com/ratchet-ai/ratchet#readme"
-Issues = "https://github.com/ratchet-ai/ratchet/issues"
+Homepage = "https://github.com/g014569142857-tech/Ratchet"
+Documentation = "https://github.com/g014569142857-tech/Ratchet#readme"
+Issues = "https://github.com/g014569142857-tech/Ratchet/issues"
 
 [project.scripts]
 ratchet = "ratchet.cli.main:main"

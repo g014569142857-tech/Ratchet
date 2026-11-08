@@ -174,6 +174,49 @@ class Engine:
         self.save_policy()
         return result
 
+    def rate_last(self, verdict: str) -> dict[str, object]:
+        """Give a thumbs up/down to the most recent interaction in this database.
+
+        ``run()`` can only take feedback *before* the model has answered, which
+        is useless from a terminal: you cannot judge an answer you have not seen.
+        This is the delayed path. It scores the latest recorded event, folds the
+        verdict into the bandit posterior and the recalled experiences, and
+        corrects the audit trail.
+
+        Raises ``ValueError`` for a bad verdict, when there is nothing to rate,
+        or when the event already carries a measured reward (re-rating would
+        double-count it in the posterior).
+        """
+        verdicts = {"up": 1, "down": -1}
+        if verdict not in verdicts:
+            raise ValueError("verdict must be 'up' or 'down'")
+        events = self.store.list_events()
+        if not events:
+            raise ValueError("no interaction to rate yet")
+        latest = events[-1]
+        if latest.reward is not None:
+            raise ValueError(
+                f"the last interaction already has a reward ({latest.reward:.2f}, "
+                f"{latest.reward_source}); re-rating would double-count it"
+            )
+        scored = self.verifier.score(
+            task=latest.task or "",
+            output=latest.output or "",
+            user_feedback=verdicts[verdict],
+        )
+        value = scored.value if scored.value is not None else 0.0
+        self.policy.update(latest.variant_id or "default", value)
+        for experience_id in latest.retrieved_ids:
+            self.store.record_reward(experience_id, value - 0.5)
+        self.store.update_event_reward(latest.id, scored)
+        self.save_policy()
+        return {
+            "verdict": verdict,
+            "reward": value,
+            "task": latest.task,
+            "variant_id": latest.variant_id,
+        }
+
     # ---------------------------------------------------- permission surface
 
     def add_rule(self, content: str, *, task_type: str | None = None) -> str:

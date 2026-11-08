@@ -6,7 +6,7 @@ contributions will touch it.
 ## Setup
 
 ```bash
-git clone https://github.com/ratchet-ai/ratchet.git
+git clone https://github.com/g014569142857-tech/Ratchet.git
 cd ratchet
 pip install -e ".[dev]"
 pytest

@@ -2,6 +2,33 @@
 
 All notable changes to this project. Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+
+- **`ratchet rate up|down`.** Judges the most recent answer after you have read it.
+  Until now the only CLI feedback was `chat --feedback`, which has to be chosen
+  *before* the model answers, so from a terminal the loop could never receive a
+  reward and never learned anything. Backed by `Engine.rate_last()`, which also
+  refuses to rate an event that already has a reward (it would be double-counted).
+- `chat` now says so on stderr when an answer produced no reward signal.
+
+### Fixed
+
+- **Token estimate under-counted Chinese.** `len // 4` is right for English but
+  CJK text is ~1-2 tokens per character, so cost reports for Chinese input were
+  several times too low. CJK characters now count as 1.5 tokens.
+- Line endings: the repository was stored with CRLF. Added `.gitattributes` and
+  normalised to LF so diffs and Linux checkouts are clean.
+- README install instructions no longer promise a PyPI package that does not exist
+  yet; they install from a clone.
+
+### Documented
+
+- New entries under Limitations: no reward means no learning, the bandit is
+  context-free, the posterior never forgets, credit assignment is coarse, and the
+  loop is a bandit plus in-context memory rather than full RL.
+
 ## [0.2.0]
 
 The release that makes the loop actually close, and gives the owner a real window

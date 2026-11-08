@@ -6,8 +6,12 @@ an API key.
 ## 1. Install
 
 ```bash
-pip install ratchet-ai
+git clone https://github.com/g014569142857-tech/Ratchet.git
+cd ratchet
+pip install -e .
 ```
+
+(Not on PyPI yet. After it is published, `pip install ratchet-ai` will do.)
 
 Core has zero third-party runtime dependencies. Nothing downloads, no GPU.
 

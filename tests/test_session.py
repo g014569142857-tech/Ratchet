@@ -241,3 +241,23 @@ class TestCostTracking:
         stats = s.stats()
         assert stats["interactions"] == 2
         assert stats["tokens_in"] > 0
+
+
+class TestTokenEstimate:
+    def test_chinese_is_not_undercounted_like_latin_text(self):
+        from ratchet.core.session import _approx_tokens
+
+        zh = "请用中文解释一下低秩适配器的原理"  # 16 CJK characters
+        # A flat len // 4 would say 4 tokens; CJK is closer to 1-2 per character.
+        assert _approx_tokens(zh) >= len(zh)
+
+    def test_latin_text_keeps_the_four_chars_per_token_rule(self):
+        from ratchet.core.session import _approx_tokens
+
+        assert _approx_tokens("a" * 40) == 10
+
+    def test_empty_is_zero_and_tiny_is_at_least_one(self):
+        from ratchet.core.session import _approx_tokens
+
+        assert _approx_tokens("") == 0
+        assert _approx_tokens("a") == 1

@@ -6,7 +6,8 @@ One ``run()`` call performs the full cycle::
     select    -> Thompson Sampling picks a prompt variant (the Action)
     assemble  -> build the prompt with experience as data, never instructions
     complete  -> call the model provider
-    verify    -> RewardChain scores the output (objective > user > judge)
+    verify    -> RewardChain scores the output (a human verdict overrides;
+                 otherwise objective checks outrank the LLM judge)
     record    -> append to the audit trail; update the policy posterior
     reflect   -> on low reward, distil a rule for next time
 
@@ -72,11 +73,32 @@ class SessionResult:
     reflections: tuple[str, ...] = ()
 
 
+def _is_cjk(ch: str) -> bool:
+    """True for Chinese / Japanese / Korean characters, which tokenise densely."""
+    code = ord(ch)
+    return (
+        0x4E00 <= code <= 0x9FFF  # CJK unified ideographs
+        or 0x3400 <= code <= 0x4DBF  # extension A
+        or 0x3040 <= code <= 0x30FF  # hiragana / katakana
+        or 0xAC00 <= code <= 0xD7AF  # hangul syllables
+        or 0x3000 <= code <= 0x303F  # CJK punctuation
+        or 0xFF00 <= code <= 0xFFEF  # full-width forms
+    )
+
+
 def _approx_tokens(text: str) -> int:
-    """Rough token estimate (~4 chars/token). Always at least 1 for non-empty text."""
+    """Rough token estimate. Always at least 1 for non-empty text.
+
+    Latin text averages ~4 characters per token, but CJK text is closer to
+    1-2 tokens per character, so a flat ``len // 4`` under-counts Chinese input
+    by several times and makes the cost report look far cheaper than it is.
+    CJK characters are therefore counted at 1.5 tokens each.
+    """
     if not text:
         return 0
-    return max(1, len(text) // 4)
+    cjk = sum(1 for ch in text if _is_cjk(ch))
+    other = len(text) - cjk
+    return max(1, round(cjk * 1.5 + other / 4))
 
 
 class Session:

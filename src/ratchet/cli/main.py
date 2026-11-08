@@ -125,6 +125,12 @@ def build_parser() -> argparse.ArgumentParser:
     train_p.add_argument("--epochs", type=float, default=1.0)
     train_p.add_argument("--dry-run", action="store_true", help="print the plan, train nothing")
 
+    rate_p = subparsers.add_parser(
+        "rate", help="thumbs up/down the most recent answer (this is how the loop learns)"
+    )
+    add_db(rate_p)
+    rate_p.add_argument("verdict", choices=("up", "down"))
+
     eval_p = subparsers.add_parser("eval", help="growth curve over recorded interactions")
     add_db(eval_p)
     eval_p.add_argument("--buckets", type=int, default=4)
@@ -445,6 +451,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         return 0
 
+    if args.command == "rate":
+        with Engine(db_path=args.db) as engine:
+            try:
+                info = engine.rate_last(args.verdict)
+            except ValueError as exc:
+                return _fail(str(exc))
+        print(
+            f"rated '{info['task']}' {args.verdict} "
+            f"(strategy: {info['variant_id']}, reward {info['reward']:.1f})"
+        )
+        return 0
+
     if args.command == "chat":
         provider, error = _make_provider(args)
         if error:
@@ -468,6 +486,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"\n--- reward: {reward_text}  variant: {result.variant_id}", file=sys.stderr)
         for reflection in result.reflections:
             print(f"--- learned: {reflection}", file=sys.stderr)
+        if result.reward.value is None:
+            print(
+                "--- nothing was learned from this answer: no reward signal. "
+                "Run 'ratchet rate up' or 'ratchet rate down' to judge it.",
+                file=sys.stderr,
+            )
         return 0
 
     return _fail(f"unknown command: {args.command}")
