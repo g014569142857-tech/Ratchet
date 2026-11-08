@@ -56,6 +56,17 @@
 
 ## 第 3 步：把两行命令粘到终端里
 
+> **先看这里（30 秒）**：第一次提交时，作者名字我先填了 `Maverick <maverick@users.noreply.github.com>`。
+> 如果你的 GitHub 用户名不叫这个，先改成你自己的，这样提交记录才挂在你的名下：
+>
+> ```bash
+> git config user.name "你的GitHub用户名"
+> git config user.email "你的邮箱"
+> git commit --amend --reset-author --no-edit
+> ```
+>
+> 名字就是 Maverick 的话，跳过这段。
+
 创建完会跳到一个页面，上面有一堆命令。**别管它写的那些，你只需要下面两行。**
 
 回到你那个黑窗口（在 `ratchet` 文件夹里），粘进去：
@@ -150,7 +161,7 @@ To https://github.com/你的用户名/ratchet.git
 | 拖不进去隐藏文件 | `.gitignore`、`.github/` 是隐藏的，Windows 默认看不到也不会拖。缺了 `.gitignore`，**你的数据库就有被传上去的风险** |
 | 拖不进去空文件夹 | 无所谓，本项目没有需要保留的空文件夹 |
 | 没有版本历史 | 只有一个大 commit，以后不好回退 |
-| 超过 100 个文件会卡 | 本项目 73 个，勉强够用 |
+| 超过 100 个文件会卡 | 本项目 74 个，勉强够用 |
 
 **所以还是推荐命令行法。** 如果你实在要用拖拽，拖完之后请务必做第 5 节那 5 项自检。
 
